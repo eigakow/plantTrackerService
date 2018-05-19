@@ -2,8 +2,8 @@
 
 const expect = require('chai').expect;
 var request = require('supertest');
-const host = 'http://localhost:60701';
 const dbconnect = require('../server');
+const host = 'http://localhost:' + process.env.PORT;
 
 let plantId,
   planttypeid,
