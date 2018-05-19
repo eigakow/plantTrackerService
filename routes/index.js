@@ -2,7 +2,7 @@
 
 const path = process.env.ROUTE_PATH;
 //Change for openshift
-const myPlantsRoutes = require(path + '/MyPlants_routes.js');
+const myPlantsRoutes = require(path + '/myPlants_routes.js');
 const eventsRoutes = require(path + '/events_routes.js');
 const plantTypesRoutes = require(path + '/plantTypes_routes.js');
 
