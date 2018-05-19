@@ -1,7 +1,10 @@
 // routes/index.js
-const myPlantsRoutes = require('./MyPlants_routes.js');
-const eventsRoutes = require('./events_routes.js');
-const plantTypesRoutes = require('./plantTypes_routes.js');
+
+const path = process.env.ROUTE_PATH;
+//Change for openshift
+const myPlantsRoutes = require(path + '/MyPlants_routes.js');
+const eventsRoutes = require(path + '/events_routes.js');
+const plantTypesRoutes = require(path + '/plantTypes_routes.js');
 
 module.exports = function(app, db) {
   myPlantsRoutes(app, db);
