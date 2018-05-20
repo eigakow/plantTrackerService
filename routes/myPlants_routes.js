@@ -3,8 +3,8 @@ var ObjectID = require('mongodb').ObjectID;
 
 module.exports = function(app, db) {
   app.get('/myPlants', (req, res) => {
-    console.log(req.query);
-    console.log(`User authenticated? ${req.isAuthenticated()}`);
+    //console.log(req.query);
+    //console.log(`User authenticated? ${req.isAuthenticated()}`);
     if (!req.isAuthenticated()) {
       res.status(401).send({ error: 'unauthorized' });
     } else {
@@ -19,7 +19,7 @@ module.exports = function(app, db) {
           if (err) {
             res.status(500).send({ error: 'An error has occurred' });
           } else {
-            console.log('Found items', items);
+            //console.log('Found items', items);
             res.send(items);
           }
         });
@@ -45,7 +45,7 @@ module.exports = function(app, db) {
                 error: 'Wrong plantTypeID provided'
               });
             } else {
-              console.log('plantTypeId existing, continue..', result);
+              //console.log('plantTypeId existing, continue..', result);
               db.collection('myPlants').insert(
                 {
                   name: req.body.name,
@@ -114,7 +114,7 @@ module.exports = function(app, db) {
                 error: 'Wrong plantTypeId provided'
               });
             } else {
-              console.log('plantTypeId existing, continue..', result);
+              //console.log('plantTypeId existing, continue..', result);
               db.collection('myPlants').updateOne(
                 { _id: ObjectID(req.query._id) },
                 {

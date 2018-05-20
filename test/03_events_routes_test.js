@@ -2,7 +2,9 @@
 
 const expect = require('chai').expect;
 const dbconnect = require('../server');
-const host = 'http://localhost:' + process.env.PORT;
+//const host = 'http://localhost:' + process.env.PORT;
+const host =
+  'http://planttrackerservice-planttrackerservice.a3c1.starter-us-west-1.openshiftapps.com';
 
 var request = require('supertest');
 var agent = request.agent(host);
@@ -82,7 +84,7 @@ describe('adding new events', () => {
         eventid = res.body._id;
         return done();
       });
-  }).timeout(1000);
+  });
   it('responds 500 if not all parameters were provided', done => {
     body = { eventType: 'watering', plantId: plantId };
     agent
@@ -94,7 +96,7 @@ describe('adding new events', () => {
         if (err) return done(err);
         return done();
       });
-  }).timeout(500);
+  });
   it("responds 400 if plantId doesn't exist", done => {
     body = {
       eventType: 'watering',
@@ -110,7 +112,7 @@ describe('adding new events', () => {
         if (err) return done(err);
         return done();
       });
-  }).timeout(500);
+  });
 });
 describe('getting events', () => {
   it('returns the event specified with _id', done => {
@@ -304,7 +306,7 @@ describe('checking authorization', () => {
         if (err) return done(err);
         return done();
       });
-  }).timeout(1000);
+  });
   it('quering events requires authorization', done => {
     agentNotOk
       .get('/events?eventType=' + eventType)

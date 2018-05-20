@@ -2,7 +2,9 @@
 
 const expect = require('chai').expect;
 const dbconnect = require('../server');
-const host = 'http://localhost:' + process.env.PORT;
+//const host = 'http://localhost:' + process.env.PORT;
+const host =
+  'http://planttrackerservice-planttrackerservice.a3c1.starter-us-west-1.openshiftapps.com';
 
 var request = require('supertest');
 var agent = request.agent(host);
@@ -53,7 +55,7 @@ describe('loading Express', () => {
   });
   it('responds to /myPlants', done => {
     agent.get('/myPlants').expect(200, done);
-  }).timeout(500);
+  });
   it('404 everything else', done => {
     agent.get('/foo/bar').expect(404, done);
   });
@@ -76,7 +78,7 @@ describe('adding new plants', () => {
         plantid = res.body._id;
         return done();
       });
-  }).timeout(500);
+  });
   it('responds 400 if not all parameters were provided', done => {
     body = { name: plantname };
     agent
@@ -100,7 +102,7 @@ describe('adding new plants', () => {
         if (err) return done(err);
         return done();
       });
-  }).timeout(500);
+  });
 });
 
 describe('getting myPlants', () => {
@@ -283,7 +285,7 @@ describe('checking authorization', () => {
         if (err) return done(err);
         return done();
       });
-  }).timeout(500);
+  });
   it('quering plants requires authorization', done => {
     agentNotOk
       .get('/myPlants?_id=' + plantid)

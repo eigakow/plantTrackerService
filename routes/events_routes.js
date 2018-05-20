@@ -18,7 +18,7 @@ module.exports = function(app, db) {
           if (err) {
             res.status(500).send({ error: 'An error has occurred' });
           } else {
-            console.log('Found items', items);
+            //console.log('Found items', items);
             res.send(items);
           }
         });
@@ -28,7 +28,7 @@ module.exports = function(app, db) {
     if (!req.isAuthenticated()) {
       res.status(401).send({ error: 'unauthorized' });
     } else {
-      console.log(req.body.plantId, req.body.eventType, req.body.eventDate);
+      //console.log(req.body.plantId, req.body.eventType, req.body.eventDate);
       if (
         req.body.eventDate &&
         req.body.plantId &&
@@ -52,7 +52,7 @@ module.exports = function(app, db) {
                 error: 'Wrong plantID provided'
               });
             } else {
-              console.log('plantId existing, continue..', result);
+              //console.log('plantId existing, continue..', result);
               // creating event
               db.collection('events').insert(
                 {
@@ -65,7 +65,7 @@ module.exports = function(app, db) {
                   if (err) {
                     res.status(400).send({ error: 'An error has occurred' });
                   } else {
-                    console.log(result);
+                    //console.log(result);
                     res.status(201).send(result.ops[0]);
                   }
                 }

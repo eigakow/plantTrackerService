@@ -2,7 +2,9 @@
 
 const expect = require('chai').expect;
 const dbconnect = require('../server');
-const host = 'http://localhost:' + process.env.PORT;
+//const host = 'http://localhost:' + process.env.PORT;
+const host =
+  'http://planttrackerservice-planttrackerservice.a3c1.starter-us-west-1.openshiftapps.com';
 
 var request = require('supertest');
 var agent = request.agent(host);
@@ -43,7 +45,7 @@ describe('loading Express', () => {
   });
 });
 describe('adding new plant type', () => {
-  it('creates a new plant', done => {
+  it('creates a new plant type', done => {
     planttypename =
       'mochaplanttype' +
       Math.random()
@@ -65,7 +67,7 @@ describe('adding new plant type', () => {
         //  console.log(res.body);
         return done();
       });
-  }).timeout(500);
+  });
 
   it('responds 400 if not all required parameters were provided', done => {
     body = {
@@ -256,7 +258,7 @@ describe('checking authorization', () => {
         if (err) return done(err);
         return done();
       });
-  }).timeout(500);
+  });
   it('quering planttypes requires authentication', done => {
     agentNotOk
       .get('/plantTypes?_id=' + planttypeid)

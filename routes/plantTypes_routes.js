@@ -3,8 +3,8 @@ var ObjectID = require('mongodb').ObjectID;
 
 module.exports = function(app, db) {
   app.get('/plantTypes', (req, res) => {
-    console.log(req.query);
-    console.log(`User authenticated? ${req.isAuthenticated()}`);
+    //console.log(req.query);
+    //console.log(`User authenticated? ${req.isAuthenticated()}`);
     if (!req.isAuthenticated()) {
       res.status(401).send({ error: 'unauthorized' });
     } else {
@@ -18,7 +18,7 @@ module.exports = function(app, db) {
           if (err) {
             res.status(500).send({ error: 'An error has occurred' });
           } else {
-            console.log('Found items', items);
+            //console.log('Found items', items);
             res.send(items);
           }
         });
@@ -27,7 +27,7 @@ module.exports = function(app, db) {
   // Possible characteristics: watering, fertilizing, repotting, misting, cleaning
   app.post('/plantTypes', (req, res) => {
     //console.log(req.body.name, req.body.plantType);
-    console.log(`User authenticated? ${req.isAuthenticated()}`);
+    //console.log(`User authenticated? ${req.isAuthenticated()}`);
     if (!req.isAuthenticated()) {
       res.status(401).send({ error: 'unauthorized' });
     } else {
@@ -56,7 +56,7 @@ module.exports = function(app, db) {
     }
   });
   app.delete('/plantTypes', (req, res) => {
-    console.log(req.query);
+    //console.log(req.query);
     if (!req.isAuthenticated()) {
       res.status(401).send({ error: 'unauthorized' });
     } else {
