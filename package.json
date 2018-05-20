@@ -1,19 +1,30 @@
 {
   "name": "planttracker",
   "version": "1.0.0",
+  "private": true,
   "description": "bakcen for the plant tracker",
   "main": "server.js",
   "scripts": {
     "test": "mocha",
-    "start": "nodemon server.js"
+    "start": "nodemon --ignore sessions/ server.js"
   },
-  "author": "Iga Kowalska",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eigakow/plantTrackerService.git"
+  },
+  "author": "Iga Kowalska <iga.kowalska@gmail.com>",
   "license": "ISC",
   "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.18.2",
     "express": "^4.16.3",
+    "express-session": "^1.15.6",
     "mongodb": "^3.0.7",
-    "morgan": "^1.9.0"
+    "morgan": "^1.9.0",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0",
+    "session-file-store": "^1.2.0",
+    "uuid": "^3.2.1"
   },
   "devDependencies": {
     "chai": "^4.1.2",

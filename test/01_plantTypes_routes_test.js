@@ -1,9 +1,12 @@
 'use strict';
 
 const expect = require('chai').expect;
-var request = require('supertest');
 const dbconnect = require('../server');
 const host = 'http://localhost:' + process.env.PORT;
+
+var request = require('supertest');
+var agent = request.agent(host);
+var agentNotOk = request.agent(host);
 
 let planttypename,
   body,
@@ -17,15 +20,26 @@ let planttypename,
   cleaningpref = '';
 
 describe('loading Express', () => {
+  it('logs in successfully', done => {
+    body = {
+      email: process.env.USER_EMAIL,
+      password: process.env.USER_TEST_PASSWORD
+    };
+    agent
+      .post('/login')
+      .set('Content-Type', 'application/json')
+      .send(body)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) return done(err);
+        return done();
+      });
+  });
   it('responds to /plantTypes', done => {
-    request(host)
-      .get('/plantTypes')
-      .expect(200, done);
+    agent.get('/plantTypes').expect(200, done);
   });
   it('404 everything else', done => {
-    request(host)
-      .get('/foo/bar')
-      .expect(404, done);
+    agent.get('/foo/bar').expect(404, done);
   });
 });
 describe('adding new plant type', () => {
@@ -40,7 +54,7 @@ describe('adding new plant type', () => {
       watering: wateringpref,
       fertilizing: fertilizingpref
     };
-    request(host)
+    agent
       .post('/plantTypes')
       .set('Content-Type', 'application/json')
       .send(body)
@@ -58,7 +72,7 @@ describe('adding new plant type', () => {
       watering: wateringpref,
       fertilizing: fertilizingpref
     };
-    request(host)
+    agent
       .post('/plantTypes')
       .set('Content-Type', 'application/json')
       .send(body)
@@ -72,7 +86,7 @@ describe('adding new plant type', () => {
 
 describe('getting plantTypes', () => {
   it('returns the plant specified with _id', done => {
-    request(host)
+    agent
       .get('/plantTypes?_id=' + planttypeid)
       .set('Content-Type', 'application/json')
       .expect(200)
@@ -83,7 +97,7 @@ describe('getting plantTypes', () => {
       });
   });
   it('returns the plant specified with name', done => {
-    request(host)
+    agent
       .get('/plantTypes?name=' + planttypename)
       .set('Content-Type', 'application/json')
       .expect(200)
@@ -94,7 +108,7 @@ describe('getting plantTypes', () => {
       });
   });
   it('returns 200 if none found', done => {
-    request(host)
+    agent
       .get('/plantTypes?_id=' + fakeplanttypeId)
       .expect(200)
       .end(function(err, res) {
@@ -105,7 +119,7 @@ describe('getting plantTypes', () => {
       });
   });
   it('returns 200 with no query parameter', done => {
-    request(host)
+    agent
       .get('/plantTypes')
       .expect(200)
       .end(function(err, res) {
@@ -118,7 +132,7 @@ describe('getting plantTypes', () => {
 
 describe('updating plantTypes', () => {
   it('responds 404 when planttypeId not found', done => {
-    request(host)
+    agent
       .put('/plantTypes?_id=' + fakeplanttypeId)
       .set('Content-Type', 'application/json')
       .send({ name: planttypename, watering: wateringpref })
@@ -130,7 +144,7 @@ describe('updating plantTypes', () => {
       });
   });
   it('responds 400 when no_id provided', done => {
-    request(host)
+    agent
       .put('/plantTypes')
       .set('Content-Type', 'application/json')
       .send({ name: planttypename, watering: wateringpref })
@@ -142,7 +156,7 @@ describe('updating plantTypes', () => {
       });
   });
   it('responds 400 when not all required fields provided in a body', done => {
-    request(host)
+    agent
       .put('/plantTypes?_id=' + planttypeid)
       .set('Content-Type', 'application/json')
       .send({ watering: wateringpref })
@@ -155,7 +169,7 @@ describe('updating plantTypes', () => {
   });
   it('changes the plant type name', done => {
     newplanttypename = planttypename + 'new';
-    request(host)
+    agent
       .put('/plantTypes?_id=' + planttypeid)
       .set('Content-Type', 'application/json')
       .send({ name: newplanttypename, fertilizing: fertilizingpref })
@@ -167,7 +181,7 @@ describe('updating plantTypes', () => {
       });
   });
   it('changes were permanent', done => {
-    request(host)
+    agent
       .get('/plantTypes?_id=' + planttypeid)
       .set('Content-Type', 'application/json')
       .expect(200)
@@ -182,7 +196,7 @@ describe('updating plantTypes', () => {
 
 describe('removing plantTypes', () => {
   it('returns 400 if no _id provided', done => {
-    request(host)
+    agent
       .delete('/plantTypes')
       .set('Content-Type', 'application/json')
       .expect(400)
@@ -193,7 +207,7 @@ describe('removing plantTypes', () => {
       });
   });
   it('returns 404 if not existing _id provided', done => {
-    request(host)
+    agent
       .delete('/plantTypes?_id=' + fakeplanttypeId)
       .set('Content-Type', 'application/json')
       .expect(404)
@@ -204,7 +218,7 @@ describe('removing plantTypes', () => {
       });
   });
   it('removes the plant by _id', done => {
-    request(host)
+    agent
       .delete('/plantTypes?_id=' + planttypeid)
       .set('Content-Type', 'application/json')
       .expect(200)
@@ -214,13 +228,104 @@ describe('removing plantTypes', () => {
       });
   });
   it('changes were permanent', done => {
-    request(host)
+    agent
       .get('/plantTypes?_id=' + planttypeid)
       .set('Content-Type', 'application/json')
       .expect(200)
       .end(function(err, res) {
         if (err) return done(err);
         expect(res.body.length).to.equal(0);
+        return done();
+      });
+  });
+});
+
+describe('checking authorization', () => {
+  it('creating a new planttype requires authentication', done => {
+    body = {
+      name: planttypename,
+      watering: wateringpref,
+      fertilizing: fertilizingpref
+    };
+    agentNotOk
+      .post('/plantTypes')
+      .set('Content-Type', 'application/json')
+      .send(body)
+      .expect(401)
+      .end(function(err, res) {
+        if (err) return done(err);
+        return done();
+      });
+  }).timeout(500);
+  it('quering planttypes requires authentication', done => {
+    agentNotOk
+      .get('/plantTypes?_id=' + planttypeid)
+      .set('Content-Type', 'application/json')
+      .expect(401)
+      .end(function(err, res) {
+        if (err) return done(err);
+        return done();
+      });
+  });
+  it('changing the planttype requires authentication', done => {
+    newplanttypename = planttypename + 'new';
+    agentNotOk
+      .put('/plantTypes?_id=' + planttypeid)
+      .set('Content-Type', 'application/json')
+      .send({ name: newplanttypename, fertilizing: fertilizingpref })
+      .expect(401)
+      .end(function(err, res) {
+        if (err) return done(err);
+        return done();
+      });
+  });
+  it('removing the plant type requires authentication', done => {
+    agentNotOk
+      .delete('/plantTypes?_id=' + planttypeid)
+      .set('Content-Type', 'application/json')
+      .expect(401)
+      .end(function(err, res) {
+        if (err) return done(err);
+        return done();
+      });
+  });
+});
+
+describe('cleanup', () => {
+  it('logs in agentNotOk', done => {
+    body = {
+      email: process.env.USER_EMAIL,
+      password: process.env.USER_TEST_PASSWORD
+    };
+    agentNotOk
+      .post('/login')
+      .set('Content-Type', 'application/json')
+      .send(body)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) return done(err);
+        return done();
+      });
+  });
+  it('logs out agentNotOk', done => {
+    agentNotOk
+      .post('/logout')
+      .set('Content-Type', 'application/json')
+      .send(body)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) return done(err);
+        return done();
+      });
+  });
+  it('logs out agent', done => {
+    agent
+      .post('/logout')
+      .set('Content-Type', 'application/json')
+      .send(body)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) return done(err);
         return done();
       });
   });

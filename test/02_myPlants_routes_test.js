@@ -1,9 +1,12 @@
 'use strict';
 
 const expect = require('chai').expect;
-var request = require('supertest');
 const dbconnect = require('../server');
 const host = 'http://localhost:' + process.env.PORT;
+
+var request = require('supertest');
+var agent = request.agent(host);
+var agentNotOk = request.agent(host);
 
 let body,
   plantname,
@@ -14,14 +17,29 @@ let body,
   fakeplanttypeid = '1119742c058b692566932709';
 
 describe('loading Express', () => {
-  before(done => {
-    //Creating a plant
+  it('logs in successfully', done => {
+    body = {
+      email: process.env.USER_EMAIL,
+      password: process.env.USER_TEST_PASSWORD
+    };
+    agent
+      .post('/login')
+      .set('Content-Type', 'application/json')
+      .send(body)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) return done(err);
+        return done();
+      });
+  });
+  //Creating a plant
+  it('creates plants', done => {
     body = {
       name: 'mocha_planttypeforplanttest',
       watering: 'Likes water',
       fertilizing: 'Once a month'
     };
-    request(host)
+    agent
       .post('/plantTypes')
       .set('Content-Type', 'application/json')
       .send(body)
@@ -34,14 +52,10 @@ describe('loading Express', () => {
       });
   });
   it('responds to /myPlants', done => {
-    request(host)
-      .get('/myPlants')
-      .expect(200, done);
+    agent.get('/myPlants').expect(200, done);
   }).timeout(500);
   it('404 everything else', done => {
-    request(host)
-      .get('/foo/bar')
-      .expect(404, done);
+    agent.get('/foo/bar').expect(404, done);
   });
 });
 describe('adding new plants', () => {
@@ -52,7 +66,7 @@ describe('adding new plants', () => {
         .toString(36)
         .substring(7);
     body = { name: plantname, plantTypeId: planttypeid };
-    request(host)
+    agent
       .post('/myPlants')
       .set('Content-Type', 'application/json')
       .send(body)
@@ -65,7 +79,7 @@ describe('adding new plants', () => {
   }).timeout(500);
   it('responds 400 if not all parameters were provided', done => {
     body = { name: plantname };
-    request(host)
+    agent
       .post('/myPlants')
       .set('Content-Type', 'application/json')
       .send(body)
@@ -77,7 +91,7 @@ describe('adding new plants', () => {
   });
   it("responds 400 if plantTypeId doesn't exist", done => {
     body = { name: plantname, plantTypeId: fakeplanttypeid };
-    request(host)
+    agent
       .post('/myPlants')
       .set('Content-Type', 'application/json')
       .send(body)
@@ -91,7 +105,7 @@ describe('adding new plants', () => {
 
 describe('getting myPlants', () => {
   it('returns the plant specified with _id', done => {
-    request(host)
+    agent
       .get('/myPlants?_id=' + plantid)
       .set('Content-Type', 'application/json')
       .expect(200)
@@ -102,7 +116,7 @@ describe('getting myPlants', () => {
       });
   });
   it('returns the plant specified with name', done => {
-    request(host)
+    agent
       .get('/myPlants?name=' + plantname)
       .set('Content-Type', 'application/json')
       .expect(200)
@@ -113,7 +127,7 @@ describe('getting myPlants', () => {
       });
   });
   it('returns 200 if none found', done => {
-    request(host)
+    agent
       .get('/myPlants?_id=' + fakeplantId)
       .expect(200)
       .end(function(err, res) {
@@ -124,7 +138,7 @@ describe('getting myPlants', () => {
       });
   });
   it('returns 200 with no query parameter', done => {
-    request(host)
+    agent
       .get('/myPlants')
       .expect(200)
       .end(function(err, res) {
@@ -137,7 +151,7 @@ describe('getting myPlants', () => {
 
 describe('updating myPlants', () => {
   it('responds 404 when plantId not found', done => {
-    request(host)
+    agent
       .put('/myPlants?_id=' + fakeplantId)
       .set('Content-Type', 'application/json')
       .send({ name: plantname, plantTypeId: planttypeid })
@@ -149,7 +163,7 @@ describe('updating myPlants', () => {
       });
   });
   it('responds 400 when no_id provided', done => {
-    request(host)
+    agent
       .put('/myPlants')
       .set('Content-Type', 'application/json')
       .send({ name: plantname, plantTypeId: planttypeid })
@@ -161,7 +175,7 @@ describe('updating myPlants', () => {
       });
   });
   it('responds 400 when not all fields provided in a body', done => {
-    request(host)
+    agent
       .put('/myPlants?_id=' + plantid)
       .set('Content-Type', 'application/json')
       .send({ plantTypeId: planttypeid })
@@ -173,7 +187,7 @@ describe('updating myPlants', () => {
       });
   });
   it('returns 400 when wrong plantTypeId given', done => {
-    request(host)
+    agent
       .put('/myPlants?_id=' + plantid)
       .set('Content-Type', 'application/json')
       .send({ name: plantname, plantTypeId: fakeplanttypeid })
@@ -186,7 +200,7 @@ describe('updating myPlants', () => {
   });
   it('changes the plant name', done => {
     newplantname = plantname + 'new';
-    request(host)
+    agent
       .put('/myPlants?_id=' + plantid)
       .set('Content-Type', 'application/json')
       .send({ name: newplantname, plantTypeId: planttypeid })
@@ -198,7 +212,7 @@ describe('updating myPlants', () => {
       });
   });
   it('changes were permanent', done => {
-    request(host)
+    agent
       .get('/myPlants?_id=' + plantid)
       .set('Content-Type', 'application/json')
       .expect(200)
@@ -213,7 +227,7 @@ describe('updating myPlants', () => {
 
 describe('removing myPlants', () => {
   it('returns 400 if no _id provided', done => {
-    request(host)
+    agent
       .delete('/myPlants')
       .set('Content-Type', 'application/json')
       .expect(400)
@@ -224,7 +238,7 @@ describe('removing myPlants', () => {
       });
   });
   it('returns 404 if not existing _id provided', done => {
-    request(host)
+    agent
       .delete('/myPlants?_id=' + fakeplantId)
       .set('Content-Type', 'application/json')
       .expect(404)
@@ -235,7 +249,7 @@ describe('removing myPlants', () => {
       });
   });
   it('removes the plant by _id', done => {
-    request(host)
+    agent
       .delete('/myPlants?_id=' + plantid)
       .set('Content-Type', 'application/json')
       .expect(200)
@@ -245,13 +259,100 @@ describe('removing myPlants', () => {
       });
   });
   it('changes were permanent', done => {
-    request(host)
+    agent
       .get('/myPlants?_id=' + plantid)
       .set('Content-Type', 'application/json')
       .expect(200)
       .end(function(err, res) {
         if (err) return done(err);
         expect(res.body.length).to.equal(0);
+        return done();
+      });
+  });
+});
+
+describe('checking authorization', () => {
+  it('creating a new plant requires authorization', done => {
+    body = { name: plantname, plantTypeId: planttypeid };
+    agentNotOk
+      .post('/myPlants')
+      .set('Content-Type', 'application/json')
+      .send(body)
+      .expect(401)
+      .end(function(err, res) {
+        if (err) return done(err);
+        return done();
+      });
+  }).timeout(500);
+  it('quering plants requires authorization', done => {
+    agentNotOk
+      .get('/myPlants?_id=' + plantid)
+      .set('Content-Type', 'application/json')
+      .expect(401)
+      .end(function(err, res) {
+        if (err) return done(err);
+        return done();
+      });
+  });
+  it('changing the plant requires authorization', done => {
+    newplantname = plantname + 'new';
+    agentNotOk
+      .put('/myPlants?_id=' + plantid)
+      .set('Content-Type', 'application/json')
+      .send({ name: newplantname, plantTypeId: planttypeid })
+      .expect(401)
+      .end(function(err, res) {
+        if (err) return done(err);
+        return done();
+      });
+  });
+  it('removing the plant requires authorization', done => {
+    agentNotOk
+      .delete('/myPlants?_id=' + plantid)
+      .set('Content-Type', 'application/json')
+      .expect(401)
+      .end(function(err, res) {
+        if (err) return done(err);
+        return done();
+      });
+  });
+});
+
+describe('cleanup', () => {
+  it('logs in agentNotOk', done => {
+    body = {
+      email: process.env.USER_EMAIL,
+      password: process.env.USER_TEST_PASSWORD
+    };
+    agentNotOk
+      .post('/login')
+      .set('Content-Type', 'application/json')
+      .send(body)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) return done(err);
+        return done();
+      });
+  });
+  it('logs out agentNotOk', done => {
+    agentNotOk
+      .post('/logout')
+      .set('Content-Type', 'application/json')
+      .send(body)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) return done(err);
+        return done();
+      });
+  });
+  it('logs out agent', done => {
+    agent
+      .post('/logout')
+      .set('Content-Type', 'application/json')
+      .send(body)
+      .expect(200)
+      .end(function(err, res) {
+        if (err) return done(err);
         return done();
       });
   });
