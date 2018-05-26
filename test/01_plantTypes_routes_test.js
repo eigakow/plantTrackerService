@@ -2,10 +2,13 @@
 
 const expect = require('chai').expect;
 const dbconnect = require('../server');
-//const host = 'http://localhost:' + process.env.PORT;
-const host =
-  'http://planttrackerservice-planttrackerservice.a3c1.starter-us-west-1.openshiftapps.com';
-
+let host;
+if (process.env.TEST_ENV === 'dev') {
+  host = 'http://localhost:' + process.env.PORT;
+} else {
+  host =
+    'http://planttrackerservice-planttrackerservice.a3c1.starter-us-west-1.openshiftapps.com';
+}
 var request = require('supertest');
 var agent = request.agent(host);
 var agentNotOk = request.agent(host);

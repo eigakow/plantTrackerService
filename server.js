@@ -3,6 +3,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 const bcrypt = require('bcrypt-nodejs');
+const helmet = require('helmet');
+const morgan = require('morgan');
 
 const app = express();
 const session = require('express-session');
@@ -17,6 +19,8 @@ if (process.env.NODE_ENV !== 'production') {
   //  console.log('Loading env values: ', process.env);
 }
 
+app.use(helmet());
+app.use(morgan('common'));
 app.use(bodyParser.json({ extended: true }));
 
 const user = {
@@ -78,7 +82,7 @@ MongoClient.connect(db_url, (err, client) => {
   require('./routes')(app, database);
   if (!module.parent) {
     app.listen(port, () => {
-      console.log('URL: ', db_url);
+      //console.log('URL: ', db_url);
       console.log('We are live on ' + port);
     });
   }

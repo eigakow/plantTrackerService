@@ -22,7 +22,7 @@ module.exports = function(app, db) {
             //console.log('Inside req.login() callback');
             //console.log(`req.session.passport: ${JSON.stringify(req.session.passport)}`);
             //console.log(`req.user: ${JSON.stringify(req.user)}`);
-            return res.send('You were authenticated & logged in!\n');
+            return res.send({ message: 'You were authenticated & logged in!' });
           });
         }
       })(req, res, next);
